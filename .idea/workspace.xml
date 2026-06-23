@@ -4,17 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8eb7c6f0-5838-4aab-aaa3-293b8c57675a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/FastAPIProject1.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test_main.http" afterDir="false" />
-    </list>
+    <list default="true" id="8eb7c6f0-5838-4aab-aaa3-293b8c57675a" name="Changes" comment="Added cluster health monitering page with realtime metrics" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -40,23 +30,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.5762525964785992" />
-      <entry key="MS500" value="3.2713271111500077" />
-      <entry key="S2" value="9.799215209826052" />
-      <entry key="S5" value="20.9742241392419" />
-      <entry key="S10" value="35.45830068027301" />
-      <entry key="S30" value="68.66490118932099" />
-      <entry key="S60" value="92.53429985961387" />
-      <entry key="M2" value="115.52672677400092" />
-      <entry key="M5" value="139.04240563888197" />
-      <entry key="M10" value="151.00378433212657" />
-      <entry key="M15" value="155.92864556850776" />
-      <entry key="M30" value="161.53092268086044" />
-      <entry key="H1" value="164.64299358233666" />
-      <entry key="H2" value="166.2888805419908" />
-      <entry key="H4" value="167.1360199143156" />
-      <entry key="D1" value="167.85481041551407" />
-      <entry key="W1" value="167.97922910596998" />
+      <entry key="MS100" value="1.005099120236712" />
+      <entry key="MS500" value="1.5295014098326227" />
+      <entry key="S2" value="3.1303722406973375" />
+      <entry key="S5" value="5.9218830661639394" />
+      <entry key="S10" value="9.110023296742018" />
+      <entry key="S30" value="13.482472165068057" />
+      <entry key="S60" value="15.115557361599407" />
+      <entry key="M2" value="17.80323049524975" />
+      <entry key="M5" value="42.889999579156026" />
+      <entry key="M10" value="82.4654456477572" />
+      <entry key="M15" value="106.36811429808424" />
+      <entry key="M30" value="139.31314481441103" />
+      <entry key="H1" value="160.27477082978888" />
+      <entry key="H2" value="172.1245030150016" />
+      <entry key="H4" value="178.42826830579983" />
+      <entry key="D1" value="183.88559035042584" />
+      <entry key="W1" value="184.84032350909996" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -78,23 +68,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.5250917245460327" />
-      <entry key="MS500" value="3.2469293622304845" />
-      <entry key="S2" value="9.780033195510407" />
-      <entry key="S5" value="20.95746487488419" />
-      <entry key="S10" value="35.44394599989882" />
-      <entry key="S30" value="68.65550230335481" />
-      <entry key="S60" value="92.52792476679498" />
-      <entry key="M2" value="115.52269987005371" />
-      <entry key="M5" value="139.04037496879457" />
-      <entry key="M10" value="151.0026300201239" />
-      <entry key="M15" value="155.92783318255434" />
-      <entry key="M30" value="161.5304906263029" />
-      <entry key="H1" value="164.64277006399462" />
-      <entry key="H2" value="166.28876676153106" />
-      <entry key="H4" value="167.13596249875897" />
-      <entry key="D1" value="167.8548007715232" />
-      <entry key="W1" value="167.97922772640305" />
+      <entry key="MS100" value="0.9642225346250255" />
+      <entry key="MS500" value="1.518027556552149" />
+      <entry key="S2" value="3.12462796760355" />
+      <entry key="S5" value="5.917398956615825" />
+      <entry key="S10" value="9.106499095953602" />
+      <entry key="S30" value="13.480698015704885" />
+      <entry key="S60" value="15.114556898051115" />
+      <entry key="M2" value="17.80263655315565" />
+      <entry key="M5" value="42.889394791846556" />
+      <entry key="M10" value="82.46483186749727" />
+      <entry key="M15" value="106.3675731413366" />
+      <entry key="M30" value="139.31277989613807" />
+      <entry key="H1" value="160.27455744526048" />
+      <entry key="H2" value="172.12438743734955" />
+      <entry key="H4" value="178.42820813330675" />
+      <entry key="D1" value="183.88557997589956" />
+      <entry key="W1" value="184.84032201835794" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
@@ -119,7 +109,7 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "main",
     "junie.onboarding.icon.badge.shown": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -163,12 +153,25 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1782248127511</updated>
-      <workItem from="1782248128546" duration="1442000" />
+      <workItem from="1782248128546" duration="1883000" />
     </task>
+    <task id="LOCAL-00001" summary="Added cluster health monitering page with realtime metrics">
+      <option name="closed" value="true" />
+      <created>1782249821390</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1782249821391</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Added cluster health monitering page with realtime metrics" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added cluster health monitering page with realtime metrics" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/FastAPIProject1$FastAPIProject1.coverage" NAME="FastAPIProject1 Coverage Results" MODIFIED="1782249566941" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
