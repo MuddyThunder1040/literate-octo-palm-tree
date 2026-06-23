@@ -24,7 +24,7 @@ class BinanceClient:
         if len(normalized_symbols) == 1:
             params["symbol"] = normalized_symbols[0]
         elif normalized_symbols:
-            params["symbols"] = json.dumps(normalized_symbols)
+            json.dumps(normalized_symbols, separators=(",", ":"))
 
         async with httpx.AsyncClient(base_url=self.base_url, timeout=self.timeout) as client:
             if "symbols" in params:
