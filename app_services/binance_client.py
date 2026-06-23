@@ -27,7 +27,11 @@ class BinanceClient:
             params["symbols"] = json.dumps(normalized_symbols)
 
         async with httpx.AsyncClient(base_url=self.base_url, timeout=self.timeout) as client:
-            response = await client.get("/api/v3/ticker/24hr", params=params)
+            if "symbols" in params:
+                url = f"/api/v3/ticker/24hr?symbols={params['symbols']}"
+                response = await client.get(url)
+            else:
+                response = await client.get("/api/v3/ticker/24hr", params=params)
             response.raise_for_status()
             payload = response.json()
 
