@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cluster Health</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f5f7fb;
+            --panel: #ffffff;
+            --line: #d9e0ea;
+            --text: #172033;
+            --muted: #66758c;
+            --good: #16835f;
+            --warn: #b7791f;
+            --bad: #c53030;
+            --track: #edf1f6;
+            --accent: #2364aa;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .shell {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 28px 0 36px;
+        }
+
+        header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            line-height: 1.05;
+            letter-spacing: 0;
+        }
+
+        .subtle {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.96rem;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex: 0 0 auto;
+            min-height: 38px;
+            border: 1px solid #bfe5d6;
+            border-radius: 999px;
+            padding: 8px 13px;
+            color: var(--good);
+            background: #effaf6;
+            font-weight: 700;
+            text-transform: capitalize;
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: currentColor;
+            box-shadow: 0 0 0 4px rgba(22, 131, 95, 0.13);
+        }
+
+        .grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .summary {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            margin-bottom: 14px;
+        }
+
+        .main-grid {
+            grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr);
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            box-shadow: 0 10px 28px rgba(23, 32, 51, 0.06);
+        }
+
+        .tile {
+            min-height: 124px;
+            padding: 18px;
+        }
+
+        .label {
+            color: var(--muted);
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .value {
+            margin-top: 10px;
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .hint {
+            margin-top: 9px;
+            color: var(--muted);
+            font-size: 0.9rem;
+            overflow-wrap: anywhere;
+        }
+
+        .panel {
+            padding: 20px;
+        }
+
+        .panel h2 {
+            margin: 0 0 16px;
+            font-size: 1.05rem;
+            letter-spacing: 0;
+        }
+
+        .metric {
+            padding: 16px 0;
+            border-top: 1px solid var(--line);
+        }
+
+        .metric:first-of-type {
+            border-top: 0;
+            padding-top: 0;
+        }
+
+        .metric-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .metric-title {
+            font-weight: 800;
+        }
+
+        .metric-number {
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+            font-weight: 700;
+        }
+
+        .bar {
+            height: 12px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: var(--track);
+        }
+
+        .bar-fill {
+            width: 0%;
+            height: 100%;
+            border-radius: inherit;
+            background: var(--accent);
+            transition: width 240ms ease, background-color 240ms ease;
+        }
+
+        .details {
+            display: grid;
+            gap: 10px;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 132px minmax(0, 1fr);
+            gap: 12px;
+            padding: 10px 0;
+            border-top: 1px solid var(--line);
+        }
+
+        .detail-row:first-child {
+            border-top: 0;
+            padding-top: 0;
+        }
+
+        .detail-row dt {
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .detail-row dd {
+            margin: 0;
+            overflow-wrap: anywhere;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .events {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .events li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 11px 0;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .events li:first-child {
+            border-top: 0;
+        }
+
+        .events strong {
+            color: var(--text);
+        }
+
+        .error {
+            display: none;
+            margin: 0 0 14px;
+            border: 1px solid #f2c2c2;
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: var(--bad);
+            background: #fff5f5;
+            font-weight: 700;
+        }
+
+        @media (max-width: 900px) {
+            .summary,
+            .main-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .shell {
+                width: min(100% - 24px, 1180px);
+                padding-top: 20px;
+            }
+
+            header,
+            .summary,
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                display: grid;
+            }
+
+            .detail-row {
+                grid-template-columns: 1fr;
+                gap: 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <header>
+            <div>
+                <h1>Cluster Health</h1>
+                <p class="subtle">Live system metrics from the active FastAPI node.</p>
+            </div>
+            <div class="status-pill" id="statusPill">
+                <span class="dot"></span>
+                <span id="statusText">Connecting</span>
+            </div>
+        </header>
+
+        <p class="error" id="errorBox">Unable to load cluster metrics.</p>
+
+        <section class="grid summary" aria-label="Cluster summary">
+            <article class="card tile">
+                <div class="label">Nodes</div>
+                <div class="value" id="nodesValue">--</div>
+                <div class="hint" id="nodesHint">Healthy nodes</div>
+            </article>
+            <article class="card tile">
+                <div class="label">CPU</div>
+                <div class="value" id="cpuValue">--</div>
+                <div class="hint" id="cpuHint">Collecting sample</div>
+            </article>
+            <article class="card tile">
+                <div class="label">Memory</div>
+                <div class="value" id="memoryValue">--</div>
+                <div class="hint" id="memoryHint">Physical memory</div>
+            </article>
+            <article class="card tile">
+                <div class="label">Disk</div>
+                <div class="value" id="diskValue">--</div>
+                <div class="hint" id="diskHint">Primary volume</div>
+            </article>
+        </section>
+
+        <section class="grid main-grid">
+            <article class="card panel">
+                <h2>Resource Utilization</h2>
+                <div class="metric">
+                    <div class="metric-head">
+                        <span class="metric-title">CPU load</span>
+                        <span class="metric-number" id="cpuNumber">--</span>
+                    </div>
+                    <div class="bar"><div class="bar-fill" id="cpuBar"></div></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-head">
+                        <span class="metric-title">Memory usage</span>
+                        <span class="metric-number" id="memoryNumber">--</span>
+                    </div>
+                    <div class="bar"><div class="bar-fill" id="memoryBar"></div></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-head">
+                        <span class="metric-title">Disk usage</span>
+                        <span class="metric-number" id="diskNumber">--</span>
+                    </div>
+                    <div class="bar"><div class="bar-fill" id="diskBar"></div></div>
+                </div>
+            </article>
+
+            <article class="card panel">
+                <h2>Node Details</h2>
+                <dl class="details">
+                    <div class="detail-row"><dt>Hostname</dt><dd id="hostname">--</dd></div>
+                    <div class="detail-row"><dt>Address</dt><dd id="addresses">--</dd></div>
+                    <div class="detail-row"><dt>Platform</dt><dd id="platform">--</dd></div>
+                    <div class="detail-row"><dt>CPU cores</dt><dd id="cpuCount">--</dd></div>
+                    <div class="detail-row"><dt>Python</dt><dd id="python">--</dd></div>
+                    <div class="detail-row"><dt>App uptime</dt><dd id="appUptime">--</dd></div>
+                    <div class="detail-row"><dt>System uptime</dt><dd id="systemUptime">--</dd></div>
+                    <div class="detail-row"><dt>Process</dt><dd id="processInfo">--</dd></div>
+                </dl>
+            </article>
+
+            <article class="card panel">
+                <h2>Capacity</h2>
+                <dl class="details">
+                    <div class="detail-row"><dt>Memory used</dt><dd id="memoryUsed">--</dd></div>
+                    <div class="detail-row"><dt>Memory free</dt><dd id="memoryFree">--</dd></div>
+                    <div class="detail-row"><dt>Disk used</dt><dd id="diskUsed">--</dd></div>
+                    <div class="detail-row"><dt>Disk free</dt><dd id="diskFree">--</dd></div>
+                    <div class="detail-row"><dt>Mount</dt><dd id="diskMount">--</dd></div>
+                </dl>
+            </article>
+
+            <article class="card panel">
+                <h2>Recent Polls</h2>
+                <ul class="events" id="events"></ul>
+            </article>
+        </section>
+    </main>
+
+    <script>
+        const elements = {
+            statusPill: document.getElementById("statusPill"),
+            statusText: document.getElementById("statusText"),
+            errorBox: document.getElementById("errorBox"),
+            nodesValue: document.getElementById("nodesValue"),
+            nodesHint: document.getElementById("nodesHint"),
+            cpuValue: document.getElementById("cpuValue"),
+            cpuHint: document.getElementById("cpuHint"),
+            memoryValue: document.getElementById("memoryValue"),
+            memoryHint: document.getElementById("memoryHint"),
+            diskValue: document.getElementById("diskValue"),
+            diskHint: document.getElementById("diskHint"),
+            cpuNumber: document.getElementById("cpuNumber"),
+            memoryNumber: document.getElementById("memoryNumber"),
+            diskNumber: document.getElementById("diskNumber"),
+            cpuBar: document.getElementById("cpuBar"),
+            memoryBar: document.getElementById("memoryBar"),
+            diskBar: document.getElementById("diskBar"),
+            hostname: document.getElementById("hostname"),
+            addresses: document.getElementById("addresses"),
+            platform: document.getElementById("platform"),
+            cpuCount: document.getElementById("cpuCount"),
+            python: document.getElementById("python"),
+            appUptime: document.getElementById("appUptime"),
+            systemUptime: document.getElementById("systemUptime"),
+            processInfo: document.getElementById("processInfo"),
+            memoryUsed: document.getElementById("memoryUsed"),
+            memoryFree: document.getElementById("memoryFree"),
+            diskUsed: document.getElementById("diskUsed"),
+            diskFree: document.getElementById("diskFree"),
+            diskMount: document.getElementById("diskMount"),
+            events: document.getElementById("events"),
+        };
+
+        const percentText = (value) => Number.isFinite(value) ? `${value.toFixed(1)}%` : "--";
+
+        function bytes(value) {
+            if (!Number.isFinite(value)) return "--";
+            const units = ["B", "KB", "MB", "GB", "TB"];
+            let size = value;
+            let unit = 0;
+            while (size >= 1024 && unit < units.length - 1) {
+                size /= 1024;
+                unit += 1;
+            }
+            return `${size.toFixed(size >= 10 || unit === 0 ? 0 : 1)} ${units[unit]}`;
+        }
+
+        function duration(seconds) {
+            if (!Number.isFinite(seconds)) return "--";
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            if (days) return `${days}d ${hours}h ${minutes}m`;
+            if (hours) return `${hours}h ${minutes}m`;
+            return `${minutes}m ${Math.floor(seconds % 60)}s`;
+        }
+
+        function severityColor(value) {
+            if (!Number.isFinite(value)) return "#8a99ad";
+            if (value >= 90) return "var(--bad)";
+            if (value >= 75) return "var(--warn)";
+            return "var(--accent)";
+        }
+
+        function setBar(bar, value) {
+            const width = Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 0;
+            bar.style.width = `${width}%`;
+            bar.style.backgroundColor = severityColor(value);
+        }
+
+        function addEvent(data) {
+            const timestamp = new Date(data.updated_at);
+            const item = document.createElement("li");
+            item.innerHTML = `<strong>${data.status}</strong><span>${timestamp.toLocaleTimeString()}</span>`;
+            elements.events.prepend(item);
+            while (elements.events.children.length > 6) {
+                elements.events.removeChild(elements.events.lastChild);
+            }
+        }
+
+        function render(data) {
+            const { cluster, node, metrics } = data;
+            const memory = metrics.memory || {};
+            const disk = metrics.disk || {};
+            const cpuPercent = Number.isFinite(metrics.cpu_percent) ? metrics.cpu_percent : null;
+
+            elements.statusText.textContent = data.status;
+            elements.statusPill.style.color = data.status === "healthy" ? "var(--good)" : "var(--warn)";
+            elements.errorBox.style.display = "none";
+
+            elements.nodesValue.textContent = `${cluster.healthy_nodes}/${cluster.node_count}`;
+            elements.nodesHint.textContent = cluster.name;
+            elements.cpuValue.textContent = percentText(cpuPercent);
+            elements.cpuHint.textContent = cpuPercent === null ? "Collecting sample" : `${node.cpu_count || "--"} logical cores`;
+            elements.memoryValue.textContent = percentText(memory.percent);
+            elements.memoryHint.textContent = `${bytes(memory.used)} of ${bytes(memory.total)}`;
+            elements.diskValue.textContent = percentText(disk.percent);
+            elements.diskHint.textContent = disk.mount || "Primary volume";
+
+            elements.cpuNumber.textContent = percentText(cpuPercent);
+            elements.memoryNumber.textContent = `${percentText(memory.percent)} used`;
+            elements.diskNumber.textContent = `${percentText(disk.percent)} used`;
+            setBar(elements.cpuBar, cpuPercent);
+            setBar(elements.memoryBar, memory.percent);
+            setBar(elements.diskBar, disk.percent);
+
+            elements.hostname.textContent = node.hostname || "--";
+            elements.addresses.textContent = node.addresses?.join(", ") || "--";
+            elements.platform.textContent = node.platform || "--";
+            elements.cpuCount.textContent = node.cpu_count || "--";
+            elements.python.textContent = node.python || "--";
+            elements.appUptime.textContent = duration(metrics.process?.uptime_seconds);
+            elements.systemUptime.textContent = duration(node.system_uptime_seconds);
+            elements.processInfo.textContent = `PID ${metrics.process?.pid || "--"}, ${metrics.process?.thread_count || "--"} threads`;
+
+            elements.memoryUsed.textContent = bytes(memory.used);
+            elements.memoryFree.textContent = bytes(memory.available);
+            elements.diskUsed.textContent = bytes(disk.used);
+            elements.diskFree.textContent = bytes(disk.free);
+            elements.diskMount.textContent = disk.mount || "--";
+
+            addEvent(data);
+        }
+
+        async function refresh() {
+            try {
+                const response = await fetch("/api/cluster/health", { cache: "no-store" });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                render(await response.json());
+            } catch (error) {
+                elements.statusText.textContent = "offline";
+                elements.statusPill.style.color = "var(--bad)";
+                elements.errorBox.style.display = "block";
+            }
+        }
+
+        refresh();
+        setInterval(refresh, 2000);
+    </script>
+</body>
+</html>
