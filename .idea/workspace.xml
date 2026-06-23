@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8eb7c6f0-5838-4aab-aaa3-293b8c57675a" name="Changes" comment="Added cluster health monitering page with realtime metrics">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_main.http" beforeDir="false" afterPath="$PROJECT_DIR$/test_main.http" afterDir="false" />
-    </list>
+    <list default="true" id="8eb7c6f0-5838-4aab-aaa3-293b8c57675a" name="Changes" comment="Added cluster health monitering page with realtime metrics" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -52,23 +48,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.4287927957663826" />
-      <entry key="MS500" value="2.277425609466029" />
-      <entry key="S2" value="3.8615964431202485" />
-      <entry key="S5" value="8.111298752581844" />
-      <entry key="S10" value="19.447341495936865" />
-      <entry key="S30" value="62.82506074366505" />
-      <entry key="S60" value="108.62169041642707" />
-      <entry key="M2" value="161.34349410905855" />
-      <entry key="M5" value="243.6163861999471" />
-      <entry key="M10" value="319.7551161303158" />
-      <entry key="M15" value="369.875339467338" />
-      <entry key="M30" value="455.6682938929681" />
-      <entry key="H1" value="524.5610823743425" />
-      <entry key="H2" value="569.5533219072396" />
-      <entry key="H4" value="595.4557366573781" />
-      <entry key="D1" value="619.0459227278831" />
-      <entry key="W1" value="623.2872743037506" />
+      <entry key="MS100" value="1.2340945131021275" />
+      <entry key="MS500" value="3.8997465363010377" />
+      <entry key="S2" value="8.166401278343866" />
+      <entry key="S5" value="15.223791030362756" />
+      <entry key="S10" value="26.10010229859947" />
+      <entry key="S30" value="45.495494350027975" />
+      <entry key="S60" value="53.984907122285136" />
+      <entry key="M2" value="59.1639271813179" />
+      <entry key="M5" value="71.15758266510497" />
+      <entry key="M10" value="123.84767328862415" />
+      <entry key="M15" value="185.51735205123666" />
+      <entry key="M30" value="325.5804575425388" />
+      <entry key="H1" value="461.790323685915" />
+      <entry key="H2" value="560.3811948858943" />
+      <entry key="H4" value="620.3374592106906" />
+      <entry key="D1" value="676.8919531999475" />
+      <entry key="W1" value="687.2531643672148" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -90,23 +86,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.3706061553973843" />
-      <entry key="MS500" value="2.258689902903529" />
-      <entry key="S2" value="3.8531382307638258" />
-      <entry key="S5" value="8.103859116794643" />
-      <entry key="S10" value="19.43838341197134" />
-      <entry key="S30" value="62.815801086102724" />
-      <entry key="S60" value="108.61389672869151" />
-      <entry key="M2" value="161.33781508521395" />
-      <entry key="M5" value="243.61302251091743" />
-      <entry key="M10" value="319.75292434216334" />
-      <entry key="M15" value="369.873645594211" />
-      <entry key="M30" value="455.66723844840044" />
-      <entry key="H1" value="524.5604674693045" />
-      <entry key="H2" value="569.5529853365274" />
-      <entry key="H4" value="595.455559891323" />
-      <entry key="D1" value="619.0458919701226" />
-      <entry key="W1" value="623.2872698763487" />
+      <entry key="MS100" value="1.1987350559363605" />
+      <entry key="MS500" value="3.8735049260739927" />
+      <entry key="S2" value="8.151947857998632" />
+      <entry key="S5" value="15.212552685505976" />
+      <entry key="S10" value="26.090351301168347" />
+      <entry key="S30" value="45.48983246431312" />
+      <entry key="S60" value="53.98155262413985" />
+      <entry key="M2" value="59.162090421960166" />
+      <entry key="M5" value="71.1566875628681" />
+      <entry key="M10" value="123.84686584862794" />
+      <entry key="M15" value="185.516530942915" />
+      <entry key="M30" value="325.5797194657004" />
+      <entry key="H1" value="461.7897913294778" />
+      <entry key="H2" value="560.3808685396506" />
+      <entry key="H4" value="620.337277552749" />
+      <entry key="D1" value="676.8919199977098" />
+      <entry key="W1" value="687.2531595471767" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
@@ -175,7 +171,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1782248127511</updated>
-      <workItem from="1782248128546" duration="4259000" />
+      <workItem from="1782248128546" duration="4824000" />
     </task>
     <task id="LOCAL-00001" summary="Added cluster health monitering page with realtime metrics">
       <option name="closed" value="true" />
@@ -201,7 +197,15 @@
       <option name="project" value="LOCAL" />
       <updated>1782250457816</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Added cluster health monitering page with realtime metrics">
+      <option name="closed" value="true" />
+      <created>1782252414271</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1782252414271</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
