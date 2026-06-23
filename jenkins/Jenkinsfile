@@ -1,0 +1,75 @@
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+    }
+
+    parameters {
+        string(
+            name: 'DOCKERHUB_REPO',
+            defaultValue: 'your-dockerhub-username/fastapi-cluster-health',
+            description: 'Docker Hub repository in the form username/repository'
+        )
+        string(
+            name: 'DOCKERHUB_CREDENTIALS_ID',
+            defaultValue: 'dockerhub-credentials',
+            description: 'Jenkins username/password credentials ID for Docker Hub'
+        )
+    }
+
+    environment {
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+        LATEST_TAG = 'latest'
+    }
+
+    stages {
+        stage('Validate') {
+            steps {
+                sh 'python3 -m compileall main.py'
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                sh '''
+                    docker build \
+                        --tag ${DOCKERHUB_REPO}:${IMAGE_TAG} \
+                        --tag ${DOCKERHUB_REPO}:${LATEST_TAG} \
+                        .
+                '''
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: params.DOCKERHUB_CREDENTIALS_ID,
+                        usernameVariable: 'DOCKERHUB_USERNAME',
+                        passwordVariable: 'DOCKERHUB_PASSWORD'
+                    )
+                ]) {
+                    sh '''
+                        echo "${DOCKERHUB_PASSWORD}" | docker login \
+                            --username "${DOCKERHUB_USERNAME}" \
+                            --password-stdin
+
+                        docker push ${DOCKERHUB_REPO}:${IMAGE_TAG}
+                        docker push ${DOCKERHUB_REPO}:${LATEST_TAG}
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker logout || true'
+        }
+        success {
+            echo "Published ${params.DOCKERHUB_REPO}:${env.IMAGE_TAG} and ${params.DOCKERHUB_REPO}:latest"
+        }
+    }
+}

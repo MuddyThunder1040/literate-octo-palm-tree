@@ -10,6 +10,31 @@ Accept: application/json
 
 ###
 
+GET http://127.0.0.1:8000/api/crypto/status
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/api/crypto/markets?symbols=BTCUSDT,ETHUSDT
+Accept: application/json
+
+###
+
+POST http://127.0.0.1:8000/api/crypto/ingest?symbols=BTCUSDT,ETHUSDT
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/api/crypto/latest?symbols=BTCUSDT,ETHUSDT
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/api/crypto/history/BTCUSDT?limit=100
+Accept: application/json
+
+###
+
 GET http://127.0.0.1:8000/hello/User
 Accept: application/json
 

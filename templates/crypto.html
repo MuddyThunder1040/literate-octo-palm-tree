@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Trading Monitor</title>
+    <style>
+        :root {
+            --bg: #f4f6f8;
+            --panel: #ffffff;
+            --line: #d8dee7;
+            --text: #172033;
+            --muted: #66758c;
+            --accent: #0969da;
+            --green: #16835f;
+            --red: #c53030;
+            --amber: #b7791f;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .shell {
+            width: min(1220px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 26px 0 36px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            font-size: clamp(1.8rem, 4vw, 2.55rem);
+            line-height: 1.08;
+            letter-spacing: 0;
+        }
+
+        h2 {
+            margin: 0 0 14px;
+            font-size: 1.05rem;
+            letter-spacing: 0;
+        }
+
+        .subtle {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) auto auto;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        input, button {
+            min-height: 40px;
+            border-radius: 7px;
+            font: inherit;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid var(--line);
+            padding: 0 12px;
+            color: var(--text);
+            background: #fff;
+        }
+
+        button {
+            border: 1px solid #0a58bf;
+            padding: 0 14px;
+            color: #fff;
+            background: var(--accent);
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        button.secondary {
+            border-color: var(--line);
+            color: var(--text);
+            background: #fff;
+        }
+
+        .grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .summary {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            margin-bottom: 14px;
+        }
+
+        .main-grid {
+            grid-template-columns: minmax(0, 1.5fr) minmax(330px, 0.8fr);
+        }
+
+        .card {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: 0 10px 26px rgba(23, 32, 51, 0.06);
+        }
+
+        .tile {
+            min-height: 112px;
+            padding: 16px;
+        }
+
+        .label {
+            color: var(--muted);
+            font-size: 0.77rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .value {
+            margin-top: 9px;
+            font-size: 1.8rem;
+            font-weight: 850;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .hint {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 0.9rem;
+            overflow-wrap: anywhere;
+        }
+
+        .panel {
+            padding: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            border-top: 1px solid var(--line);
+            text-align: left;
+            font-size: 0.92rem;
+            vertical-align: middle;
+        }
+
+        th {
+            color: var(--muted);
+            font-size: 0.75rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        td {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .price {
+            font-weight: 850;
+        }
+
+        .positive { color: var(--green); }
+        .negative { color: var(--red); }
+        .warn { color: var(--amber); }
+
+        .status-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 150px minmax(0, 1fr);
+            gap: 12px;
+            padding: 10px 0;
+            border-top: 1px solid var(--line);
+        }
+
+        .row:first-child { border-top: 0; padding-top: 0; }
+        .row dt { color: var(--muted); font-weight: 800; }
+        .row dd { margin: 0; overflow-wrap: anywhere; }
+
+        .message {
+            display: none;
+            margin: 0 0 14px;
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-weight: 750;
+        }
+
+        .message.error {
+            border: 1px solid #f2c2c2;
+            color: var(--red);
+            background: #fff5f5;
+        }
+
+        .message.info {
+            border: 1px solid #bdd7f5;
+            color: #174d8a;
+            background: #f1f7ff;
+        }
+
+        @media (max-width: 920px) {
+            .summary, .main-grid { grid-template-columns: 1fr 1fr; }
+            .toolbar { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 680px) {
+            .shell { width: min(100% - 24px, 1220px); }
+            header, .summary, .main-grid { grid-template-columns: 1fr; }
+            header { display: grid; }
+            .table-wrap { overflow-x: auto; }
+            table { min-width: 720px; }
+            .row { grid-template-columns: 1fr; gap: 3px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <header>
+            <div>
+                <h1>Crypto Trading Monitor</h1>
+                <p class="subtle">Binance spot market snapshots persisted to Cassandra.</p>
+            </div>
+            <button class="secondary" id="healthButton">Refresh status</button>
+        </header>
+
+        <p class="message error" id="errorBox"></p>
+        <p class="message info" id="infoBox"></p>
+
+        <section class="toolbar" aria-label="Market controls">
+            <input id="symbolsInput" value="BTCUSDT,ETHUSDT,BNBUSDT,SOLUSDT,XRPUSDT" aria-label="Symbols">
+            <button id="ingestButton">Fetch and Store</button>
+            <button class="secondary" id="latestButton">Load Latest</button>
+        </section>
+
+        <section class="grid summary">
+            <article class="card tile">
+                <div class="label">Tracked symbols</div>
+                <div class="value" id="symbolCount">--</div>
+                <div class="hint" id="symbolHint">Configured market list</div>
+            </article>
+            <article class="card tile">
+                <div class="label">Cassandra</div>
+                <div class="value" id="cassandraState">--</div>
+                <div class="hint" id="cassandraHint">Storage connection</div>
+            </article>
+            <article class="card tile">
+                <div class="label">Latest price</div>
+                <div class="value" id="topPrice">--</div>
+                <div class="hint" id="topSymbol">Waiting for data</div>
+            </article>
+            <article class="card tile">
+                <div class="label">Last ingest</div>
+                <div class="value" id="lastIngest">--</div>
+                <div class="hint">Server timestamp</div>
+            </article>
+        </section>
+
+        <section class="grid main-grid">
+            <article class="card panel">
+                <h2>Latest Market Snapshots</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Price</th>
+                                <th>24h %</th>
+                                <th>High</th>
+                                <th>Low</th>
+                                <th>Volume</th>
+                                <th>Observed</th>
+                            </tr>
+                        </thead>
+                        <tbody id="priceRows"></tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article class="card panel">
+                <h2>Service Status</h2>
+                <dl class="status-list">
+                    <div class="row"><dt>Binance API</dt><dd id="binanceUrl">--</dd></div>
+                    <div class="row"><dt>Cassandra hosts</dt><dd id="cassandraHosts">--</dd></div>
+                    <div class="row"><dt>Keyspace</dt><dd id="keyspace">--</dd></div>
+                    <div class="row"><dt>Auto ingest</dt><dd id="autoIngest">--</dd></div>
+                    <div class="row"><dt>Storage error</dt><dd id="storageError">--</dd></div>
+                </dl>
+            </article>
+
+            <article class="card panel">
+                <h2>Symbol History</h2>
+                <section class="toolbar">
+                    <input id="historySymbol" value="BTCUSDT" aria-label="History symbol">
+                    <button id="historyButton">Load History</button>
+                    <button class="secondary" id="clearButton">Clear</button>
+                </section>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Observed</th>
+                                <th>Price</th>
+                                <th>24h %</th>
+                                <th>Quote volume</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyRows"></tbody>
+                    </table>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <script>
+        const els = {
+            symbolsInput: document.getElementById("symbolsInput"),
+            ingestButton: document.getElementById("ingestButton"),
+            latestButton: document.getElementById("latestButton"),
+            healthButton: document.getElementById("healthButton"),
+            historyButton: document.getElementById("historyButton"),
+            clearButton: document.getElementById("clearButton"),
+            historySymbol: document.getElementById("historySymbol"),
+            errorBox: document.getElementById("errorBox"),
+            infoBox: document.getElementById("infoBox"),
+            symbolCount: document.getElementById("symbolCount"),
+            symbolHint: document.getElementById("symbolHint"),
+            cassandraState: document.getElementById("cassandraState"),
+            cassandraHint: document.getElementById("cassandraHint"),
+            topPrice: document.getElementById("topPrice"),
+            topSymbol: document.getElementById("topSymbol"),
+            lastIngest: document.getElementById("lastIngest"),
+            priceRows: document.getElementById("priceRows"),
+            binanceUrl: document.getElementById("binanceUrl"),
+            cassandraHosts: document.getElementById("cassandraHosts"),
+            keyspace: document.getElementById("keyspace"),
+            autoIngest: document.getElementById("autoIngest"),
+            storageError: document.getElementById("storageError"),
+            historyRows: document.getElementById("historyRows"),
+        };
+
+        const money = (value) => Number.isFinite(value) ? Number(value).toLocaleString(undefined, { maximumFractionDigits: 8 }) : "--";
+        const compact = (value) => Number.isFinite(value) ? Number(value).toLocaleString(undefined, { notation: "compact", maximumFractionDigits: 2 }) : "--";
+        const pct = (value) => Number.isFinite(value) ? `${Number(value).toFixed(2)}%` : "--";
+        const when = (value) => value ? new Date(value).toLocaleTimeString() : "--";
+
+        function show(box, message) {
+            box.textContent = message;
+            box.style.display = message ? "block" : "none";
+        }
+
+        function changeClass(value) {
+            if (!Number.isFinite(value)) return "";
+            return value >= 0 ? "positive" : "negative";
+        }
+
+        function symbolsParam() {
+            return els.symbolsInput.value.split(",").map((item) => item.trim().toUpperCase()).filter(Boolean).join(",");
+        }
+
+        async function requestJson(url, options = {}) {
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                const body = await response.text();
+                throw new Error(body || `HTTP ${response.status}`);
+            }
+            return response.json();
+        }
+
+        function renderPrices(rows) {
+            els.priceRows.innerHTML = "";
+            if (!rows.length) {
+                els.priceRows.innerHTML = `<tr><td colspan="7">No stored prices yet.</td></tr>`;
+                els.topPrice.textContent = "--";
+                els.topSymbol.textContent = "Waiting for data";
+                return;
+            }
+
+            rows.forEach((row) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td><strong>${row.symbol}</strong></td>
+                    <td class="price">${money(row.price)}</td>
+                    <td class="${changeClass(row.price_change_percent)}">${pct(row.price_change_percent)}</td>
+                    <td>${money(row.high_price)}</td>
+                    <td>${money(row.low_price)}</td>
+                    <td>${compact(row.volume)}</td>
+                    <td>${when(row.observed_at)}</td>
+                `;
+                els.priceRows.appendChild(tr);
+            });
+
+            els.topPrice.textContent = money(rows[0].price);
+            els.topSymbol.textContent = rows[0].symbol;
+        }
+
+        function renderHistory(rows) {
+            els.historyRows.innerHTML = "";
+            if (!rows.length) {
+                els.historyRows.innerHTML = `<tr><td colspan="4">No history available for this symbol today.</td></tr>`;
+                return;
+            }
+            rows.forEach((row) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${when(row.observed_at)}</td>
+                    <td class="price">${money(row.price)}</td>
+                    <td class="${changeClass(row.price_change_percent)}">${pct(row.price_change_percent)}</td>
+                    <td>${compact(row.quote_volume)}</td>
+                `;
+                els.historyRows.appendChild(tr);
+            });
+        }
+
+        async function loadStatus() {
+            const data = await requestJson("/api/crypto/status");
+            const cassandra = data.cassandra || {};
+            els.symbolCount.textContent = data.default_symbols.length;
+            els.symbolHint.textContent = data.default_symbols.join(", ");
+            els.cassandraState.textContent = cassandra.ready ? "Ready" : "Down";
+            els.cassandraState.className = `value ${cassandra.ready ? "positive" : "negative"}`;
+            els.cassandraHint.textContent = cassandra.ready ? "Connected" : "Check server config";
+            els.lastIngest.textContent = when(data.last_ingest_at);
+            els.binanceUrl.textContent = data.binance_base_url;
+            els.cassandraHosts.textContent = `${(cassandra.hosts || []).join(", ")}:${cassandra.port || "--"}`;
+            els.keyspace.textContent = cassandra.keyspace || "--";
+            els.autoIngest.textContent = data.auto_ingest_seconds > 0 ? `${data.auto_ingest_seconds}s` : "Disabled";
+            els.storageError.textContent = cassandra.error || data.last_error || "--";
+        }
+
+        async function ingest() {
+            show(els.errorBox, "");
+            show(els.infoBox, "Fetching Binance data and writing snapshots.");
+            const payload = await requestJson(`/api/crypto/ingest?symbols=${encodeURIComponent(symbolsParam())}`, { method: "POST" });
+            const rows = payload.data || [];
+            renderPrices(rows);
+            await loadStatus();
+            show(els.infoBox, `${payload.storage_ready ? "Stored" : "Fetched"} ${rows.length} market snapshots.`);
+        }
+
+        async function loadLatest() {
+            show(els.errorBox, "");
+            const rows = await requestJson(`/api/crypto/latest?symbols=${encodeURIComponent(symbolsParam())}`);
+            renderPrices(rows);
+            await loadStatus();
+        }
+
+        async function loadHistory() {
+            show(els.errorBox, "");
+            const symbol = els.historySymbol.value.trim().toUpperCase();
+            const rows = await requestJson(`/api/crypto/history/${encodeURIComponent(symbol)}?limit=100`);
+            renderHistory(rows);
+        }
+
+        async function run(action) {
+            try {
+                await action();
+            } catch (error) {
+                show(els.infoBox, "");
+                show(els.errorBox, error.message);
+            }
+        }
+
+        els.ingestButton.addEventListener("click", () => run(ingest));
+        els.latestButton.addEventListener("click", () => run(loadLatest));
+        els.healthButton.addEventListener("click", () => run(loadStatus));
+        els.historyButton.addEventListener("click", () => run(loadHistory));
+        els.clearButton.addEventListener("click", () => {
+            els.historyRows.innerHTML = "";
+            show(els.errorBox, "");
+            show(els.infoBox, "");
+        });
+
+        run(async () => {
+            await loadStatus();
+            await loadLatest();
+        });
+    </script>
+</body>
+</html>
