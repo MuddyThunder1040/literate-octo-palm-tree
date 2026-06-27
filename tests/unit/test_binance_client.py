@@ -1,6 +1,6 @@
 from decimal import Decimal
+from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
-import respx
 import httpx
 
 from app_services.binance_client import BinanceClient, _to_decimal, _normalize_symbol
@@ -45,12 +45,15 @@ def test_map_ticker():
 
 @pytest.mark.asyncio
 async def test_get_24hr_tickers_single():
-    with respx.mock(base_url="https://data-api.binance.vision") as mock:
-        mock.get("/api/v3/ticker/24hr").mock(
-            return_value=httpx.Response(200, json=_raw_ticker())
-        )
-        client = BinanceClient()
-        result = await client.get_24hr_tickers(["BTCUSDT"])
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.json.return_value = _raw_ticker()
+    mock_response.raise_for_status = MagicMock()
+
+    mock_client = AsyncMock()
+    mock_client.__aenter__.return_value.get = AsyncMock(return_value=mock_response)
+
+    with patch("app_services.binance_client.httpx.AsyncClient", return_value=mock_client):
+        result = await BinanceClient().get_24hr_tickers(["BTCUSDT"])
 
     assert len(result) == 1
     assert result[0]["symbol"] == "BTCUSDT"
@@ -59,11 +62,14 @@ async def test_get_24hr_tickers_single():
 @pytest.mark.asyncio
 async def test_get_24hr_tickers_multiple():
     raw = [_raw_ticker("BTCUSDT"), _raw_ticker("ETHUSDT")]
-    with respx.mock(base_url="https://data-api.binance.vision") as mock:
-        mock.get("/api/v3/ticker/24hr").mock(
-            return_value=httpx.Response(200, json=raw)
-        )
-        client = BinanceClient()
-        result = await client.get_24hr_tickers(["BTCUSDT", "ETHUSDT"])
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.json.return_value = raw
+    mock_response.raise_for_status = MagicMock()
+
+    mock_client = AsyncMock()
+    mock_client.__aenter__.return_value.get = AsyncMock(return_value=mock_response)
+
+    with patch("app_services.binance_client.httpx.AsyncClient", return_value=mock_client):
+        result = await BinanceClient().get_24hr_tickers(["BTCUSDT", "ETHUSDT"])
 
     assert len(result) == 2

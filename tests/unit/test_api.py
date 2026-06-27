@@ -1,8 +1,24 @@
-import respx
-import httpx
-from unittest.mock import patch
+from decimal import Decimal
+from unittest.mock import patch, AsyncMock
 
 from app_services.market_repository import market_repository
+
+
+def _ticker(symbol="BTCUSDT"):
+    return {
+        "symbol": symbol,
+        "price": Decimal("50000.00"),
+        "price_change": Decimal("1000.00"),
+        "price_change_percent": Decimal("2.04"),
+        "weighted_avg_price": Decimal("49500.00"),
+        "high_price": Decimal("51000.00"),
+        "low_price": Decimal("48000.00"),
+        "volume": Decimal("100.5"),
+        "quote_volume": Decimal("5000000.00"),
+        "open_time": 1700000000000,
+        "close_time": 1700086400000,
+        "trade_count": 50000,
+    }
 
 
 def test_health_check(client):
@@ -28,34 +44,18 @@ def test_home_returns_html(client):
 
 
 def test_crypto_markets_success(client):
-    raw = [{
-        "symbol": "BTCUSDT",
-        "lastPrice": "50000.00",
-        "priceChange": "1000.00",
-        "priceChangePercent": "2.04",
-        "weightedAvgPrice": "49500.00",
-        "highPrice": "51000.00",
-        "lowPrice": "48000.00",
-        "volume": "100.5",
-        "quoteVolume": "5000000.00",
-        "openTime": 1700000000000,
-        "closeTime": 1700086400000,
-        "count": 50000,
-    }]
-    with respx.mock(base_url="https://data-api.binance.vision") as mock:
-        mock.get("/api/v3/ticker/24hr").mock(
-            return_value=httpx.Response(200, json=raw)
-        )
+    tickers = [_ticker()]
+    with patch("app_services.crypto_market.binance_client.get_24hr_tickers",
+               new_callable=AsyncMock, return_value=tickers):
         r = client.get("/api/crypto/markets?symbols=BTCUSDT")
     assert r.status_code == 200
     assert r.json()[0]["symbol"] == "BTCUSDT"
 
 
 def test_crypto_markets_upstream_error(client):
-    with respx.mock(base_url="https://data-api.binance.vision") as mock:
-        mock.get("/api/v3/ticker/24hr").mock(
-            return_value=httpx.Response(503)
-        )
+    import httpx
+    with patch("app_services.crypto_market.binance_client.get_24hr_tickers",
+               new_callable=AsyncMock, side_effect=httpx.HTTPError("upstream down")):
         r = client.get("/api/crypto/markets?symbols=BTCUSDT")
     assert r.status_code == 502
 
@@ -74,24 +74,9 @@ def test_crypto_history(client):
 
 
 def test_ingest_when_cassandra_not_ready(client):
-    raw = [{
-        "symbol": "BTCUSDT",
-        "lastPrice": "50000.00",
-        "priceChange": "0.00",
-        "priceChangePercent": "0.00",
-        "weightedAvgPrice": "50000.00",
-        "highPrice": "51000.00",
-        "lowPrice": "49000.00",
-        "volume": "100.0",
-        "quoteVolume": "5000000.00",
-        "openTime": 1700000000000,
-        "closeTime": 1700086400000,
-        "count": 1000,
-    }]
-    with respx.mock(base_url="https://data-api.binance.vision") as mock:
-        mock.get("/api/v3/ticker/24hr").mock(
-            return_value=httpx.Response(200, json=raw)
-        )
+    tickers = [_ticker()]
+    with patch("app_services.crypto_market.binance_client.get_24hr_tickers",
+               new_callable=AsyncMock, return_value=tickers):
         r = client.post("/api/crypto/ingest?symbols=BTCUSDT")
     assert r.status_code == 200
     body = r.json()
