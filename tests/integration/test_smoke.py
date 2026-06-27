@@ -4,7 +4,6 @@ Set APP_URL env var (default: http://localhost:8001).
 """
 import os
 import httpx
-import pytest
 
 BASE = os.getenv("APP_URL", "http://localhost:8001")
 

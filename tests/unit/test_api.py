@@ -1,7 +1,6 @@
-import pytest
 import respx
 import httpx
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch
 
 from app_services.market_repository import market_repository
 
