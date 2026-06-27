@@ -1,0 +1,123 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Lint + Unit tests
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt ruff
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Unit tests
+        run: pytest tests/unit/ -v
+
+  deploy-dev:
+    name: Deploy → dev
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, Linux, X64]
+    environment: dev
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t crypto-monitor:dev .
+
+      - name: Deploy dev container
+        run: |
+          docker rm -f crypto-monitor-dev 2>/dev/null || true
+          docker run -d \
+            --name crypto-monitor-dev \
+            --restart unless-stopped \
+            -p 8001:8000 \
+            -e CASSANDRA_HOSTS=100.64.213.62 \
+            -e CASSANDRA_KEYSPACE=crypto_market \
+            -e CRYPTO_AUTO_INGEST_SECONDS=30 \
+            --network homelab-net \
+            crypto-monitor:dev
+
+      - name: Wait for startup
+        run: |
+          for i in $(seq 1 20); do
+            curl -sf http://localhost:8001/api/cluster/health && exit 0
+            sleep 3
+          done
+          echo "Dev deployment did not become healthy" && exit 1
+
+  integration-test:
+    name: Integration tests → dev
+    needs: deploy-dev
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Run integration tests
+        env:
+          APP_URL: http://localhost:8001
+        run: pytest tests/integration/ -v
+
+  promote-prod:
+    name: Promote → prod
+    needs: integration-test
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, Linux, X64]
+    environment: prod
+
+    steps:
+      - name: Promote image
+        run: docker tag crypto-monitor:dev crypto-monitor:prod
+
+      - name: Deploy prod container
+        run: |
+          docker rm -f crypto-monitor-prod 2>/dev/null || true
+          docker run -d \
+            --name crypto-monitor-prod \
+            --restart unless-stopped \
+            -p 8000:8000 \
+            -e CASSANDRA_HOSTS=100.64.213.62 \
+            -e CASSANDRA_KEYSPACE=crypto_market \
+            -e CRYPTO_AUTO_INGEST_SECONDS=60 \
+            --network homelab-net \
+            crypto-monitor:prod
+
+      - name: Smoke test prod
+        run: |
+          for i in $(seq 1 20); do
+            curl -sf http://localhost:8000/api/cluster/health && exit 0
+            sleep 3
+          done
+          echo "Prod deployment did not become healthy" && exit 1
+
+      - name: Notify Slack
+        run: |
+          curl -s -X POST -H 'Content-type: application/json' \
+            --data '{
+              "attachments": [{
+                "color": "good",
+                "text": "crypto-monitor promoted to prod from ${{ github.ref_name }} (${{ github.sha }})."
+              }]
+            }' \
+            "${{ secrets.SLACK_WEBHOOK_URL }}"
